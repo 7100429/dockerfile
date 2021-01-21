@@ -1,0 +1,39 @@
+#base image
+FROM golang
+
+
+MAINTAINER john zeng john@sina.com
+
+# ENV GOPATH /go
+ENV GOROOT=/usr/local/go
+ENV GOPATH=/www/go
+ENV PATH=$GOPATH/bin/:$PATH
+
+
+# Set programe dir
+RUN export GO111MODULE=on
+RUN export GOPROXY="https://goproxy.cn" 
+
+RUN go env -w GO111MODULE=on
+RUN go env -w GOPROXY=https://goproxy.io,direct
+RUN go env -w GOPRIVATE=*.corp.example.com
+RUN go env -w GOPRIVATE=example.com/org_name
+
+COPY . /www/go/src
+WORKDIR /www/go/src/goweb
+
+# Install beego & bee
+RUN go get github.com/astaxie/beego && go get github.com/beego/bee && go get github.com/go-sql-driver/mysql
+
+#COPY . /www/go/src
+#COPY tmpdir/ .
+#WORKDIR /www/go/src/goweb
+
+#初始化模板
+RUN go mod init
+
+# Open port 8080
+EXPOSE 8080
+
+# Start command
+CMD ["bee", "run"]
